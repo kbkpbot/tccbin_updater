@@ -4,6 +4,8 @@ This tool generate prebuilt versions (or latest version by default) of:
 1. TCC from git://repo.or.cz/tinycc.git
 2. libgc from https://github.com/ivmai/bdwgc/.
 
+for [vlang](https://github.com/vlang/v), something like [tccbin](https://github.com/vlang/tccbin).
+
 ## Pre-Install 
 
 1. windows : `git`, `vs studio`(include `nmake`, `cl`)
