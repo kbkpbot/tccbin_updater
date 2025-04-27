@@ -167,8 +167,9 @@ config_bdwgc = """
 				"""
 [aarch64]
 #--disable-thread-local-alloc: tcc for aarch64 can't link with thread local symbols
+#-mno-outline-atomics: gcc cflags
 config_bdwgc = """
-				CC=cc CFLAGS='-Os -mtune=generic -fPIC'  LDFLAGS='-Os -fPIC' \
+				CC=cc CFLAGS='-Os -mtune=generic -fPIC -mno-outline-atomics'  LDFLAGS='-Os -fPIC' \
 				./configure \
 				--disable-dependency-tracking \
 				--disable-docs \
