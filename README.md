@@ -8,7 +8,7 @@ for [vlang](https://github.com/vlang/v), something like [tccbin](https://github.
 
 ## Pre-Install 
 
-1. windows : `git`, `vs studio`(include `nmake`, `cl`)
+1. windows : `git`, [`Visual Studio Build Tools​`](https://visualstudio.microsoft.com/zh-hans/downloads/)(include `nmake`, `cl`)
 2. nix : `git`, `automake`, `libtool`, `gmake`
 3. ubuntu : `libgc-dev` 
 3. freebsd : `boehm-gc-threaded-8.2.8`
