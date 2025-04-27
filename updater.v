@@ -139,6 +139,7 @@ fn main() {
 		}
 		used_time := time.now() - start_time
 		builder.logger.info('complete in ${used_time}')
+		builder.logger.info('update binaries has been copied to ${builder.target_dir}')
 	}
 	builder.logger.info('done')
 }
