@@ -49,6 +49,7 @@ mut:
 	doc                toml.Doc
 	all_tool_available bool = true
 	pwd                string
+	target_dir         string
 	work_dir           string
 	win_sys_dir        string
 	amalgamate         string
@@ -78,21 +79,20 @@ fn main() {
 	mut builder := new_builder(doc)
 	if flag_options.restore {
 		builder.logger.info('restore tcc/libgc from backup dirs')
-		if !os.is_dir(@VEXEROOT + '/thirdparty/tcc.work') {
-			builder.logger.info('restore tcc fail, no dir : ${@VEXEROOT}/thirdparty/tcc.work')
+		if !os.is_dir(builder.target_dir + '/tcc.work') {
+			builder.logger.info('restore tcc fail, no dir : ${builder.target_dir}/tcc.work')
 		}
-		if !os.is_dir(@VEXEROOT + '/thirdparty/libgc.work') {
-			builder.logger.info('restore libgc fail, no dir : ${@VEXEROOT}/thirdparty/libgc.work')
+		if !os.is_dir(builder.target_dir + '/libgc.work') {
+			builder.logger.info('restore libgc fail, no dir : ${builder.target_dir}/libgc.work')
 		}
-		if os.is_dir(@VEXEROOT + '/thirdparty/tcc') {
-			os.rmdir_all(@VEXEROOT + '/thirdparty/tcc')!
+		if os.is_dir(builder.target_dir + '/tcc') {
+			os.rmdir_all(builder.target_dir + '/tcc')!
 		}
-		if os.is_dir(@VEXEROOT + '/thirdparty/libgc') {
-			os.rmdir_all(@VEXEROOT + '/thirdparty/libgc')!
+		if os.is_dir(builder.target_dir + '/libgc') {
+			os.rmdir_all(builder.target_dir + '/libgc')!
 		}
-		os.cp_all(@VEXEROOT + '/thirdparty/tcc.work', @VEXEROOT + '/thirdparty/tcc', true)!
-		os.cp_all(@VEXEROOT + '/thirdparty/libgc.work', @VEXEROOT + '/thirdparty/libgc',
-			true)!
+		os.cp_all(builder.target_dir + '/tcc.work', builder.target_dir + '/tcc', true)!
+		os.cp_all(builder.target_dir + '/libgc.work', builder.target_dir + '/libgc', true)!
 		return
 	}
 	builder.pwd = os.getwd()
@@ -106,6 +106,7 @@ fn main() {
 	}
 	builder.init()
 	if builder.all_tool_available {
+		builder.logger.info('update binaries will copy to ${builder.target_dir}')
 		start_time := time.now()
 		builder.backup_current('tcc')!
 		builder.backup_current('libgc')!
@@ -158,12 +159,29 @@ fn new_builder(doc toml.Doc) &Builder {
 	if doc.value('global.log_to').string() == 'file' {
 		logger.set_full_logpath(doc.value('global.log_file').string())
 	}
-	return &Builder{
+
+	mut b := &Builder{
 		doc:      doc
 		logger:   logger
-		work_dir: doc.value('global.work_dir').string().replace('\${vtmp}', os.vtmp_dir())
 		skip_git: doc.value('global.skip_git').bool()
 	}
+	mut target_dir := doc.value('global.target_dir').string()
+	if target_dir == '' {
+		target_dir = @VEXEROOT + '/thirdparty'
+	} else {
+		target_dir = b.replace_string(target_dir)
+	}
+
+	mut work_dir := doc.value('global.work_dir').string()
+	if work_dir == '' {
+		work_dir = os.vtmp_dir()
+	} else {
+		work_dir = b.replace_string(work_dir)
+	}
+
+	b.target_dir = target_dir
+	b.work_dir = work_dir
+	return b
 }
 
 // parse flags to FlagOptions struct
@@ -216,11 +234,13 @@ fn (mut builder Builder) init() {
 fn (mut builder Builder) backup_current(tool string) ! {
 	// backup
 	builder.logger.info('backup current ${tool}')
-	if os.is_dir(@VEXEROOT + '/thirdparty/${tool}.work') {
-		os.rmdir_all(@VEXEROOT + '/thirdparty/${tool}.work')!
+	if os.is_dir('${builder.target_dir}/${tool}.work') {
+		os.rmdir_all('${builder.target_dir}/${tool}.work')!
 	}
-	os.rename_dir(@VEXEROOT + '/thirdparty/${tool}', @VEXEROOT + '/thirdparty/${tool}.work')!
-	os.mkdir(@VEXEROOT + '/thirdparty/${tool}')!
+	if os.is_dir('${builder.target_dir}/${tool}') {
+		os.rename_dir('${builder.target_dir}/${tool}', '${builder.target_dir}/${tool}.work')!
+	}
+	os.mkdir_all('${builder.target_dir}/${tool}')!
 }
 
 fn (mut builder Builder) download(tool string, commit string) ! {
@@ -295,7 +315,7 @@ fn (mut builder Builder) replace_string(input string) string {
 		.replace('\${work_dir_tcc}', builder.work_dir + '/tcc')
 		.replace('\${work_dir_bdwgc}', builder.work_dir + '/bdwgc')
 		.replace('\${amalgamate}', builder.amalgamate)
-		.replace('\${tcc}', @VEXEROOT + '/thirdparty/tcc/tcc.exe')
+		.replace('\${tcc}', '${builder.target_dir}/tcc/tcc.exe')
 		.replace('\${machine}', machine)
 		.trim_space()
 	if output.contains('\$') {
@@ -372,7 +392,7 @@ fn (mut builder Builder) build_bdwgc() ! {
 	} else {
 		// windows
 		builder.cmd_exec(config_cmd)
-		tcc := @VEXEROOT + '/thirdparty/tcc/tcc.exe'
+		tcc := '${builder.target_dir}/tcc/tcc.exe'
 		builder.cmd_exec('${tcc} -ar rcs ${work_dir_bdwgc}/extra/amalgamated_gc.a ${work_dir_bdwgc}/extra/amalgamated_gc.o')
 	}
 }
@@ -382,17 +402,17 @@ fn (mut builder Builder) copy_tcc() ! {
 	builder.logger.info('copy tcc for ${os_detail}')
 	build_dir_tcc := os.from_slash(builder.work_dir + '/tcc/build')
 
-	os.cp_all(build_dir_tcc, @VEXEROOT + '/thirdparty/tcc', true)!
-	if os.is_dir(@VEXEROOT + '/thirdparty/tcc/examples') {
-		os.rmdir_all(@VEXEROOT + '/thirdparty/tcc/examples')!
+	os.cp_all(build_dir_tcc, '${builder.target_dir}/tcc', true)!
+	if os.is_dir('${builder.target_dir}/tcc/examples') {
+		os.rmdir_all('${builder.target_dir}/tcc/examples')!
 	}
-	if os.is_dir(@VEXEROOT + '/thirdparty/tcc/include') && os_kind == 'windows' {
+	if os.is_dir('${builder.target_dir}/tcc/include') && os_kind == 'windows' {
 		// windows need a new include dir, `windows_copy_extra_files()`
-		os.rmdir_all(@VEXEROOT + '/thirdparty/tcc/include')!
+		os.rmdir_all('${builder.target_dir}/tcc/include')!
 	}
-	if os.exists(@VEXEROOT + '/thirdparty/tcc/tcc') {
+	if os.exists('${builder.target_dir}/tcc/tcc') {
 		// nix need to rename `tcc` to `tcc.exe`
-		os.rename(@VEXEROOT + '/thirdparty/tcc/tcc', @VEXEROOT + '/thirdparty/tcc/tcc.exe')!
+		os.rename('${builder.target_dir}/tcc/tcc', '${builder.target_dir}/tcc/tcc.exe')!
 	}
 }
 
@@ -402,13 +422,13 @@ fn (mut builder Builder) copy_bdwgc() ! {
 	work_dir_bdwgc := os.from_slash(builder.work_dir + '/bdwgc')
 
 	// backup
-	os.cp_all(work_dir_bdwgc + '/include', @VEXEROOT + '/thirdparty/libgc/include', true)!
+	os.cp_all(work_dir_bdwgc + '/include', '${builder.target_dir}/libgc/include', true)!
 
-	os.cp(work_dir_bdwgc + '/extra/amalgamated_gc.c', @VEXEROOT + '/thirdparty/libgc/gc.c')!
+	os.cp(work_dir_bdwgc + '/extra/amalgamated_gc.c', '${builder.target_dir}/libgc/gc.c')!
 	if os_kind == 'windows' {
-		os.cp(work_dir_bdwgc + '/extra/amalgamated_gc.a', @VEXEROOT + '/thirdparty/tcc/lib/libgc.a')!
+		os.cp(work_dir_bdwgc + '/extra/amalgamated_gc.a', '${builder.target_dir}/tcc/lib/libgc.a')!
 	} else {
-		os.cp(work_dir_bdwgc + '/.libs/libgc.a', @VEXEROOT + '/thirdparty/tcc/lib/libgc.a')!
+		os.cp(work_dir_bdwgc + '/.libs/libgc.a', '${builder.target_dir}/tcc/lib/libgc.a')!
 	}
 }
 
@@ -420,7 +440,7 @@ fn (mut builder Builder) copy_extra_files() ! {
 		for item_array in list_file.array() {
 			item := item_array.array()
 			src := os.from_slash(builder.pwd + '/files/' + item[0].string())
-			dst := os.from_slash(@VEXEROOT + '/thirdparty/' + item[1].string())
+			dst := os.from_slash('${builder.target_dir}/' + item[1].string())
 			builder.logger.debug('copy [${src}] => [${dst}]')
 			if os.is_dir(src) {
 				os.cp_all(src, dst, true)!

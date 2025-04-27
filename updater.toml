@@ -11,16 +11,17 @@
 # ${work_dir_tcc} will be replaced by `work_dir+'/tcc'`
 # ${work_dir_bdwgc} will be replaced by `work_dir+'/bdwgc'`
 # ${amalgamate} will be replaced by `@VEXEROOT/cmd/tools/amalgamate`
-# ${tcc} will be replaced by `@VEXEROOT/thirdparty/tcc/tcc.exe`
+# ${tcc} will be replaced by `target_dir + '/tcc/tcc.exe'`
 # ${machine} will be replaced by `machine`, like `x86_64`, `aarch64`
 
 title = "tcc/bdwgc updater config"
 
 [global]
-log_level = 4
+target_dir = '${vtmp}/test'     # if not set, `updater` will use `@VEXEROOT/thirdparty`
+log_level = 4 
 log_to = 'terminal'             # 'terminal' or 'file'
 log_file = 'log.txt'
-work_dir = '${vtmp}/builder'
+work_dir = '${vtmp}/builder'    # if not set, will use `${vtmp}`
 skip_git = true                 # if true, will skip `git clone` if target dir exist
 clean_up = false                # clean up after update
 
