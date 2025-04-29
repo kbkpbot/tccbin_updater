@@ -18,7 +18,7 @@ title = "tcc/bdwgc updater config"
 
 [global]
 target_dir = '${vtmp}/test'     # if not set, `updater` will use `@VEXEROOT/thirdparty`
-log_level = 4 
+log_level = 5
 log_to = 'terminal'             # 'terminal' or 'file'
 log_file = 'log.txt'
 work_dir = '${vtmp}/builder'    # if not set, will use `${vtmp}`
@@ -28,7 +28,6 @@ clean_up = false                # clean up after update
 [tools_need]
 nix = 	[
 			['git', 'git --version', 'git version'],
-			['gmake', 'gmake -v', 'Make'],
 			['cc', 'cc -v', ' version'],
 		]
 windows = [
@@ -104,6 +103,7 @@ config_tcc = """
 			--extra-cflags=-O3 \
 			--config-bcheck=yes \
 			--config-backtrace=yes \
+			--enable-static \
 			--debug
 			"""
 

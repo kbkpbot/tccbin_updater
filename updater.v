@@ -19,6 +19,7 @@ import toml
 // windows: vs tools
 // freebsd: git,automake,libtool,gmake,boehm-gc-threaded-8.2.8,
 // openbsd: git,automake,libtool,gmake,boehm-gc,
+// termux: clang,binutils,git,automake,libtool,autoconf,libgc
 
 // available command line flags:
 // --restore : restore from backup dir
@@ -27,6 +28,7 @@ const machine = os.uname().machine
 const os_detail = os.user_os()
 const os_kind = if os_detail == 'windows' { 'windows' } else { 'nix' }
 const git_commit_info_format = 'commit %H%nDate: %aI%nDate Unix: %ct%nSubject: %s'
+const make = if os_detail == 'freebsd' || os_detail == 'openbsd' { 'gmake' } else { 'make' }
 
 // builder
 // name
@@ -366,8 +368,8 @@ fn (mut builder Builder) build_tcc() ! {
 	config_cmd := builder.replace_string(builder.get_doc_value('config_tcc')!.string())
 	if os_kind == 'nix' {
 		builder.cmd_exec(config_cmd)
-		builder.cmd_exec('gmake')
-		builder.cmd_exec('gmake install')
+		builder.cmd_exec(make)
+		builder.cmd_exec('${make} install')
 	} else {
 		// windows
 		os.chdir(work_dir_tcc + '\\win32')!
@@ -384,12 +386,12 @@ fn (mut builder Builder) build_bdwgc() ! {
 	config_cmd := builder.replace_string(builder.get_doc_value('config_bdwgc')!.string())
 	if os_kind == 'nix' {
 		if os.exists('./Makefile') {
-			builder.cmd_exec('gmake distclean')
+			builder.cmd_exec('${make} distclean')
 		} else {
 			builder.cmd_exec('./autogen.sh')
 		}
 		builder.cmd_exec(config_cmd)
-		builder.cmd_exec('gmake')
+		builder.cmd_exec(make)
 	} else {
 		// windows
 		builder.cmd_exec(config_cmd)
