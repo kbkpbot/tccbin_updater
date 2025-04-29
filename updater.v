@@ -101,9 +101,9 @@ fn main() {
 	if os_kind == 'windows' {
 		env := os.environ()
 		builder.win_sys_dir = if runtime.is_32bit() {
-			env['windir'] + '\\system32'
-		} else {
 			env['windir'] + '\\SysWOW64'
+		} else {
+			env['windir'] + '\\system32'
 		}
 	}
 	builder.init()
