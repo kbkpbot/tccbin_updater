@@ -10,9 +10,9 @@
 //#include <minwindef.h>
 //#include <minwinbase.h>
 //
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 //
 //#if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_APP)
 //#define CREATE_NEW 1
@@ -198,8 +198,8 @@
 //  WINBASEAPI HANDLE WINAPI CreateFile2 (LPCWSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, DWORD dwCreationDisposition, LPCREATEFILE2_EXTENDED_PARAMETERS pCreateExParams);
 //#endif
 //#endif
-//
-//#ifdef __cplusplus
-//}
-//#endif
+
+#ifdef __cplusplus
+}
+#endif
 #endif
