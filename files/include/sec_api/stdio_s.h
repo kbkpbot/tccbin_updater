@@ -137,6 +137,9 @@ extern "C" {
 #endif
 
   _CRTIMP size_t __cdecl _fread_nolock_s(void *_DstBuf,size_t _DstSize,size_t _ElementSize,size_t _Count,FILE *_File);
+  _CRTIMP errno_t __cdecl fopen_s(FILE **_File,const char *_Filename,const char *_Mode);
+  _CRTIMP errno_t __cdecl freopen_s(FILE** _File, const char *_Filename, const char *_Mode, FILE *_Stream);
+  _CRTIMP errno_t __cdecl tmpfile_s(FILE **_File);
 
 #ifdef __cplusplus
 }

@@ -46,7 +46,8 @@ commit_bdwgc = 'master'
 [windows]
 # if true, `updater` we scan all .v/.c/.h for Windows API reference, 
 # and write only used Windows functions to `.def` files.
-opt_def = true
+# as some function declare via #define, opt_def should disable now.
+opt_def = false
 
 # we will use `tcc` generate `.def` for these system dlls
 # if `opt_def` is `true`, then only part of functions' names will be written to `.def`.
