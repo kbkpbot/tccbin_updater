@@ -39,3 +39,4 @@ config for different platform/system.
 3. OpenBSD 7.6 amd64
 4. FreeBSD 14.2 amd64
 5. Ubuntu 22.04.5 LTS aarch64
+6. Termux aarch64
