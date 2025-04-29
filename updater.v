@@ -120,8 +120,8 @@ fn main() {
 			builder.rebuild_tcc_def_files()!
 		}
 		builder.copy_tcc()!
-		builder.amalgamate_bdwgc()!
 		builder.apply_patch('bdwgc')!
+		builder.amalgamate_bdwgc()!
 
 		builder.copy_extra_files()!
 
