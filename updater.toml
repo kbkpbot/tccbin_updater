@@ -23,6 +23,7 @@ log_to = 'terminal'             # 'terminal' or 'file'
 log_file = 'log.txt'
 work_dir = '${vtmp}/builder'    # if not set, will use `${vtmp}`
 skip_git = true                 # if true, will skip `git clone` if target dir exist
+skip_checkout = true            # if true, will skip `git checkout`
 clean_up = false                # clean up after update
 
 [tools_need]

@@ -56,6 +56,7 @@ mut:
 	win_sys_dir        string
 	amalgamate         string
 	skip_git           bool
+	skip_checkout      bool
 	all_v_ref_funcs    []string
 }
 
@@ -164,9 +165,10 @@ fn new_builder(doc toml.Doc) &Builder {
 	}
 
 	mut b := &Builder{
-		doc:      doc
-		logger:   logger
-		skip_git: doc.value('global.skip_git').bool()
+		doc:           doc
+		logger:        logger
+		skip_git:      doc.value('global.skip_git').bool()
+		skip_checkout: doc.value('global.skip_checkout').bool()
 	}
 	mut target_dir := doc.value('global.target_dir').string()
 	if target_dir == '' {
@@ -269,10 +271,16 @@ fn (mut builder Builder) download(tool string, commit string) ! {
 	if !builder.skip_git || !os.is_dir(git_repo_dir) {
 		// clone repos
 		builder.cmd_exec('git clone --filter=blob:none ${git_repo_url} ${git_repo_dir}')
+	} else {
+		builder.logger.info('skip git clone ${tool}')
 	}
 
-	// checkout
-	builder.cmd_exec('git -C ${git_repo_dir} checkout -f ${commit}')
+	if !builder.skip_checkout {
+		// checkout
+		builder.cmd_exec('git -C ${git_repo_dir} checkout -f ${commit}')
+	} else {
+		builder.logger.info('skip git checkout ${tool}')
+	}
 
 	// get output of git log -1 (last commit)
 	git_log := builder.cmd_exec('git -C ${git_repo_dir} log -1 --format="${git_commit_info_format}"')
