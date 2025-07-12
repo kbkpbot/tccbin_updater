@@ -194,7 +194,7 @@ config_tcc = """
 			./configure \
 			--prefix=${work_dir_tcc}/build \
 			--bindir=${work_dir_tcc}/build \
-			--tccdir=${work_dir_tcc}/build/lib
+			--tccdir=${work_dir_tcc}/build/lib \
 			--includedir=${work_dir_tcc}/include \
 			--crtprefix=${work_dir_tcc}/build/lib:/usr/lib/${machine}-linux-gnu:/usr/lib64:/usr/lib:/lib/${machine}-linux-gnu:/lib \
 			--sysincludepaths=${work_dir_tcc}/include:${work_dir_tcc}/lib/include:/usr/local/include:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include:/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include \
