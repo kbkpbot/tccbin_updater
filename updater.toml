@@ -209,3 +209,21 @@ config_tcc = """
 			--dwarf=5 \
 			--debug
 			"""
+[riscv64]
+# remove --mtune=generic as RISCV gcc does not support it.
+config_bdwgc = """
+                                CC=cc CFLAGS='-Os -fPIC' LDFLAGS='-Os -fPIC' \
+                                ./configure \
+                                --disable-dependency-tracking \
+                                --disable-docs \
+                                --enable-handle-fork=yes \
+                                --enable-rwlock \
+                                --enable-threads=pthreads \
+                                --enable-static \
+                                --enable-shared=no \
+                                --enable-parallel-mark \
+                                --enable-single-obj-compilation \
+                                --enable-gc-debug \
+                                --with-libatomic-ops=none \
+                                --enable-sigrt-signals
+                                """
